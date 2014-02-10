@@ -78,6 +78,9 @@ class JsonReportPlugin(Plugin):
     def startTest(self, test):
         self._timer = time()
 
+    def external_id(self, test):
+        return getattr(test.test.test, 'test_id', None)
+
     def addError(self, test, err, capt=None):
         taken = self._get_time_taken()
 
@@ -92,6 +95,7 @@ class JsonReportPlugin(Plugin):
         self.results.append({
             'classname': ':'.join(id_split(id)[0].rsplit('.', 1)),
             'name': id_split(id)[-1],
+            'id': self.external_id(test),
             'time': taken,
             'type': type,
             'errtype': nice_classname(err[0]),
@@ -107,6 +111,7 @@ class JsonReportPlugin(Plugin):
         self.results.append({
             'classname': ':'.join(id_split(id)[0].rsplit('.', 1)),
             'name': id_split(id)[-1],
+            'id': self.external_id(test),
             'time': taken,
             'type': 'failure',
             'errtype': nice_classname(err[0]),

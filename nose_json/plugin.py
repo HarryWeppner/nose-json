@@ -67,7 +67,9 @@ class JsonReportPlugin(Plugin):
         self.stats['total'] = (self.stats['errors'] + self.stats['failures']
                                + self.stats['passes'] + self.stats['skipped'])
 
-        with codecs.open(self.report_output, 'w', self.encoding, 'replace') as fp:
+        with codecs.open(
+            self.report_output, 'w', self.encoding, 'replace'
+        ) as fp:
             fp.write(simplejson.dumps({
                 'stats': self.stats,
                 'results': self.results,

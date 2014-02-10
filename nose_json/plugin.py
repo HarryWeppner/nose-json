@@ -116,9 +116,15 @@ class JsonReportPlugin(Plugin):
         taken = self._get_time_taken()
         self.stats['passes'] += 1
         id = test.id()
-        self.results.append({
+        test_result = {
             'classname': ':'.join(id_split(id)[0].rsplit('.', 1)),
             'name': id_split(id)[-1],
+            'id': self.external_id(test),
             'time': taken,
             'type': 'success',
-        })
+        }
+
+        if hasattr(test.test.test, 'details'):
+            test_result.update({'details': test.test.test.details})
+
+        self.results.append(test_result)

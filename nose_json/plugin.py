@@ -79,7 +79,10 @@ class JsonReportPlugin(Plugin):
         self._timer = time()
 
     def external_id(self, test):
-        return getattr(test.test.test, 'test_id', None)
+        if hasattr(test.test, 'test'):
+            return getattr(test.test.test, 'test_id', None)
+        else:
+            return None
 
     def addError(self, test, err, capt=None):
         taken = self._get_time_taken()
@@ -120,6 +123,7 @@ class JsonReportPlugin(Plugin):
         })
 
     def addSuccess(self, test, capt=None):
+        details = None
         taken = self._get_time_taken()
         self.stats['passes'] += 1
         id = test.id()
@@ -131,7 +135,16 @@ class JsonReportPlugin(Plugin):
             'type': 'success',
         }
 
-        if hasattr(test.test.test, 'details'):
-            test_result.update({'details': test.test.test.details})
+        # unittest.TestCase based test
+        if hasattr(test.test, 'details'):
+            details = test.test.details
+
+        # Function based test
+        if details is None and hasattr(test.test, 'test'):
+            if hasattr(test.test.test, 'details'):
+                details = test.test.test.details
+
+        if details is not None:
+            test_result.update({'details': details})
 
         self.results.append(test_result)

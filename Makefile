@@ -1,5 +1,5 @@
 # Install location
-TOOLS?= /testlab/results/bin/tools
+TOOLS?= /mnt/lab/bin/tools
 
 # Package location
 VPATH=./dist

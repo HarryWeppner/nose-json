@@ -10,6 +10,7 @@ import os
 import simplejson
 import traceback
 from time import time
+from ts_time import rdtsc
 from nose.exc import SkipTest
 from nose.plugins import Plugin
 from nose.plugins.xunit import id_split, nice_classname, exc_message
@@ -29,6 +30,11 @@ class JsonReportPlugin(Plugin):
             # due to custom TestResult munging
             taken = 0.0
         return taken
+
+    def _get_tsc_timestamp(self):
+        """Returns a tuple of time and tsc timestamp"""
+
+        return (time(), rdtsc())
 
     def options(self, parser, env):
         Plugin.options(self, parser, env)
@@ -77,6 +83,7 @@ class JsonReportPlugin(Plugin):
 
     def startTest(self, test):
         self._timer = time()
+        self._tsc_start = self._get_tsc_timestamp()
 
     def external_id(self, test):
         if hasattr(test.test, 'test'):
@@ -104,6 +111,8 @@ class JsonReportPlugin(Plugin):
             'errtype': nice_classname(err[0]),
             'message': exc_message(err),
             'tb': tb,
+            'start': self._tsc_start,
+            'end': self._get_tsc_timestamp(),
         })
 
     def addFailure(self, test, err, capt=None, tb_info=None):
@@ -120,6 +129,8 @@ class JsonReportPlugin(Plugin):
             'errtype': nice_classname(err[0]),
             'message': exc_message(err),
             'tb': tb,
+            'start': self._tsc_start,
+            'end': self._get_tsc_timestamp(),
         })
 
     def addSuccess(self, test, capt=None):
@@ -133,6 +144,8 @@ class JsonReportPlugin(Plugin):
             'id': self.external_id(test),
             'time': taken,
             'type': 'success',
+            'start': self._tsc_start,
+            'end': self._get_tsc_timestamp(),
         }
 
         # unittest.TestCase based test

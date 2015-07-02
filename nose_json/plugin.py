@@ -9,6 +9,8 @@ import codecs
 import os
 import simplejson
 import traceback
+import facter
+from ast import literal_eval
 from time import time
 from ts_time import rdtsc
 from nose.exc import SkipTest
@@ -48,6 +50,8 @@ class JsonReportPlugin(Plugin):
 
     def configure(self, options, config):
         Plugin.configure(self, options, config)
+        f = facter.Facter()
+        f['architecture']  # need to access value before cache
         self.config = config
         if not self.enabled:
             return
@@ -58,6 +62,16 @@ class JsonReportPlugin(Plugin):
             'passes': 0,
             'skipped': 0,
         }
+
+        # obtain and format guest information
+        g = f._cache
+        for key in g.keys():
+            temp = g[key].replace('=>', ':')
+            try:
+                g[key] = literal_eval(temp)
+            except:
+                pass
+        self.guest = g
         self.results = []
 
         report_output = options.json_file
@@ -79,6 +93,7 @@ class JsonReportPlugin(Plugin):
             fp.write(simplejson.dumps({
                 'stats': self.stats,
                 'results': self.results,
+                'guest': self.guest,
             }))
 
     def startTest(self, test):

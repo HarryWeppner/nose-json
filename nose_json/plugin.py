@@ -9,7 +9,10 @@ import codecs
 import os
 import simplejson
 import traceback
-import facter
+try:
+    import facter
+except:
+    pass
 from ast import literal_eval
 from time import time
 from ts_time import rdtsc
@@ -50,8 +53,6 @@ class JsonReportPlugin(Plugin):
 
     def configure(self, options, config):
         Plugin.configure(self, options, config)
-        f = facter.Facter()
-        f['architecture']  # need to access value before cache
         self.config = config
         if not self.enabled:
             return
@@ -64,14 +65,19 @@ class JsonReportPlugin(Plugin):
         }
 
         # obtain and format guest information
-        g = f._cache
-        for key in g.keys():
-            temp = g[key].replace('=>', ':')
-            try:
-                g[key] = literal_eval(temp)
-            except:
-                pass
-        self.guest = g
+        try:
+            f = facter.Facter()
+            f['architecture']  # need to access value before cache
+            g = f._cache
+            for key in g.keys():
+                temp = g[key].replace('=>', ':')
+                try:
+                    g[key] = literal_eval(temp)
+                except:
+                    pass
+            self.guest = g
+        except:
+            self.guest = None
         self.results = []
 
         report_output = options.json_file

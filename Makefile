@@ -1,3 +1,6 @@
+# Version
+VERSION=0.2.5
+
 # Install location
 TOOLS?= /mnt/lab/bin/tools
 
@@ -5,12 +8,12 @@ TOOLS?= /mnt/lab/bin/tools
 VPATH=./dist
 
 # Always re-generate archive
-.PHONY: nose-json-0.2.4.tar.gz
+.PHONY: nose-json-$(VERSION).tar.gz
 
 # Copy archive to nfs share
-dist: nose-json-0.2.4.tar.gz
+dist: nose-json-$(VERSION).tar.gz
 	cp $(VPATH)/$< $(TOOLS)/
 
 # Generate package archive
-nose-json-0.2.4.tar.gz :
+nose-json-$(VERSION).tar.gz :
 	python setup.py sdist
